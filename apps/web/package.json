@@ -13,8 +13,10 @@
     "cross-env": "^7.0.3",
     "next": "14.0.4",
     "react": "^18",
+    "react-datepicker": "^7.6.0",
     "react-dom": "^18",
-    "react-icons": "^5.4.0"
+    "react-icons": "^5.4.0",
+    "react-toastify": "^11.0.3"
   },
   "devDependencies": {
     "@types/node": "^20",

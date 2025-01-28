@@ -34,6 +34,8 @@
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
-    "axios": "^1.7.2"
+    "axios": "^1.7.2",
+    "formik": "^2.4.6",
+    "yup": "^1.6.1"
   }
 }

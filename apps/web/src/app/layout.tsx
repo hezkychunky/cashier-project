@@ -5,6 +5,8 @@ import './globals.css';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { usePathname } from 'next/navigation';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({ subsets: ['latin'] });
 const disabledHeader = ['/login'];
@@ -22,6 +24,7 @@ export default function RootLayout({
           {!disabledHeader.includes(pathName) && <Sidebar />}
           <div className="flex flex-col max-h-screen">
             {!disabledHeader.includes(pathName) && <Header />}
+            <ToastContainer />
             <main className="w-full">{children}</main>
           </div>
         </div>

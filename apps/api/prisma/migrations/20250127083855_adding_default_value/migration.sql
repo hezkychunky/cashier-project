@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `product` MODIFY `price` DOUBLE NOT NULL DEFAULT 0,
+    MODIFY `stock` INTEGER NOT NULL DEFAULT 0;

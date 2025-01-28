@@ -65,8 +65,8 @@ model Product {
   id          Int      @id @default(autoincrement())
   category    Category 
   name        String
-  price       Float
-  stock       Int
+  price       Float @default(0)
+  stock       Int @default(0)
   image       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

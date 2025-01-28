@@ -1,6 +1,7 @@
 import { AiOutlineDollar } from 'react-icons/ai';
 import { GrUserSettings } from 'react-icons/gr';
 import { GiCoffeeCup } from 'react-icons/gi';
+import { FaCashRegister } from 'react-icons/fa';
 import Link from 'next/link';
 
 export const Sidebar = () => {
@@ -11,6 +12,11 @@ export const Sidebar = () => {
           B<span className="text-gray-800">C</span>
         </h1>
       </div>
+      <Link href={'/cashier'}>
+        <button className="flex w-12 justify-center items-center gap-2 bg-white text-orange-500 px-2 py-1 rounded font-medium hover:bg-orange-100">
+          <FaCashRegister size={28} />
+        </button>
+      </Link>
       <Link href={'/sales-admin'}>
         <button className="flex w-12 justify-center items-center gap-2 bg-white text-orange-500 px-2 py-1 rounded font-medium hover:bg-orange-100">
           <AiOutlineDollar size={30} />
