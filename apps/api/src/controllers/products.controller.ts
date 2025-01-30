@@ -4,21 +4,31 @@ import prisma from '@/prisma';
 export class ProductController {
   async getProducts(req: Request, res: Response) {
     try {
+      const { category, search, sort } = req.query;
+
+      console.log(
+        `Received query - Category: ${category}, Search: ${search}, Sort: ${sort}`,
+      );
+
+      const whereCondition: any = { deletedAt: null };
+
+      if (category) whereCondition.category = category.toString().toUpperCase();
+      if (search) whereCondition.name = { contains: search.toString() };
+
       const products = await prisma.product.findMany({
-        where: { deletedAt: null },
+        where: whereCondition,
+        orderBy: { stock: sort === 'asc' ? 'asc' : 'desc' }, // Sorting by stock
       });
-      res.status(200).json({
-        success: true,
-        data: products,
-      });
+
+      res.status(200).json({ success: true, data: products });
     } catch (error) {
       console.error('Error fetching products:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch products.',
-      });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to fetch products.' });
     }
   }
+
   async createProduct(req: Request, res: Response) {
     const { name, category, price, stock } = req.body;
 

@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
-import { ShiftType } from '@prisma/client';
 
 export class OrderController {
   // Fetch all orders
@@ -115,8 +114,7 @@ export class OrderController {
       }
 
       const selectedDate = new Date(date as string);
-      const nextDay = new Date(selectedDate);
-      nextDay.setDate(selectedDate.getDate() + 1);
+      const formattedDate = selectedDate.toISOString().split('T')[0];
 
       const productSales = await prisma.orderItem.groupBy({
         by: ['productId'],
@@ -124,8 +122,8 @@ export class OrderController {
         where: {
           order: {
             createdAt: {
-              gte: selectedDate,
-              lt: nextDay,
+              gte: new Date(`${formattedDate}T00:00:00.000Z`),
+              lt: new Date(`${formattedDate}T23:59:59.999Z`),
             },
           },
         },
@@ -166,15 +164,13 @@ export class OrderController {
       }
 
       const selectedDate = new Date(date as string);
-      const nextDay = new Date(selectedDate);
-      nextDay.setDate(selectedDate.getDate() + 1);
+      const formattedDate = selectedDate.toISOString().split('T')[0];
 
-      // Fetch shift data for the selected date
       const shifts = await prisma.shift.findMany({
         where: {
           startTime: {
-            gte: selectedDate,
-            lt: nextDay,
+            gte: new Date(`${formattedDate}T00:00:00.000Z`),
+            lt: new Date(`${formattedDate}T23:59:59.999Z`),
           },
         },
         include: {
@@ -187,7 +183,6 @@ export class OrderController {
         },
       });
 
-      // Aggregate data per shift
       const shiftSummary = shifts.map((shift) => {
         const cashOrders = shift.orders.filter(
           (order) => order.paymentMethod === 'CASH',

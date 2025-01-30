@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { DatePickerComponent } from './components/datePicker';
 import TransactionSummary from './components/transactionSummary';
 import { ProductSalesTable } from './components/productSalesTable';
@@ -9,11 +10,18 @@ import { ShiftSalesTable } from './components/shiftSalesTable';
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function SalesAdmin() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [transactionData, setTransactionData] = useState<TransactionData>({
     totalTransactions: 0,
     totalAmount: 0,
   });
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const dateParam = searchParams.get('date');
+  const initialDate = dateParam ? new Date(dateParam) : new Date();
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
+
   const [productSales, setProductSales] = useState<ProductSales[]>([]);
   const [shiftSales, setShiftSales] = useState<ShiftSales[]>([]);
 
@@ -74,6 +82,12 @@ export default function SalesAdmin() {
     }
   };
 
+  const handleDateChange = (date: Date) => {
+    setSelectedDate(date);
+    const formattedDate = date.toISOString().split('T')[0];
+    router.push(`?date=${formattedDate}`);
+  };
+
   useEffect(() => {
     fetchDailyTransactions(selectedDate);
     fetchDailyProductSales(selectedDate);
@@ -85,7 +99,7 @@ export default function SalesAdmin() {
       <h1 className="font-bold">SALES & TRANSACTION</h1>
       <DatePickerComponent
         selectedDate={selectedDate}
-        onChange={setSelectedDate}
+        onChange={handleDateChange}
       />
       <TransactionSummary
         totalTransactions={transactionData.totalTransactions}

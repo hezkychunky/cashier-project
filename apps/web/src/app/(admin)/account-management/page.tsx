@@ -2,10 +2,11 @@
 
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { IoCreateOutline, IoAddCircleOutline } from 'react-icons/io5';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import CreateUserModal from './components/createAccountModal';
 import EditUserModal from './components/editAccountModal';
 import DeleteUserModal from './components/deleteAccountModal';
+import debounce from 'lodash.debounce'; // Import debounce function
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
@@ -16,23 +17,60 @@ export default function AccountManagement() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await fetch(`${BASEURL}/api/user`);
+  // State for role filter & search query
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Fetch users with filtering and searching
+  const fetchUsers = async (role: string, search: string) => {
+    try {
+      let queryParams = new URLSearchParams();
+      if (role) queryParams.append('role', role);
+      if (search) queryParams.append('search', search);
+
+      const response = await fetch(
+        `${BASEURL}/api/user?${queryParams.toString()}`,
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
       const data = await response.json();
+      console.log(data.data);
       setUsers(data.data);
-    };
-    fetchUsers();
-  }, []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
-  const openCreateModal = () => setIsCreateModalOpen(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      fetchUsers(selectedRole, query);
+    }, 1000),
+    [selectedRole],
+  );
+
+  const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const role = event.target.value;
+    setSelectedRole(role);
+    fetchUsers(role, searchQuery);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query);
+  };
+
+  const openCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
   const openEditModal = (user: User) => {
     setSelectedUser(user);
     setIsEditModalOpen(true);
   };
+
   const openDeleteModal = (user: User) => {
     setSelectedUser(user);
     setIsDeleteModalOpen(true);
@@ -45,9 +83,15 @@ export default function AccountManagement() {
     setSelectedUser(null);
   };
 
+  useEffect(() => {
+    fetchUsers(selectedRole, searchQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRole]);
+
   return (
     <div className="flex flex-col items-center h-auto bg-[#fffaf0] text-gray-800 py-4 gap-4">
       <h1 className="font-bold">EMPLOYEE MANAGEMENT</h1>
+
       <div className="flex space-x-4">
         <button
           onClick={openCreateModal}
@@ -56,12 +100,28 @@ export default function AccountManagement() {
           Add Data
           <IoAddCircleOutline size={30} />
         </button>
-        <select className="mb-4 border p-2 rounded bg-white">
+
+        {/* Role Filter */}
+        <select
+          value={selectedRole}
+          onChange={handleRoleChange}
+          className="border p-2 rounded-lg bg-white"
+        >
           <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="cashier">Cashier</option>
+          <option value="ADMIN">Admin</option>
+          <option value="CASHIER">Cashier</option>
         </select>
+
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Search by Full Name..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="border p-2 rounded-lg bg-white border-orange-500"
+        />
       </div>
+
       <table className="w-4/5 border-slate-700">
         <thead className="bg-orange-300 border-b">
           <tr>

@@ -5,12 +5,35 @@ import bcrypt from 'bcrypt';
 export class UserController {
   async getUsers(req: Request, res: Response) {
     try {
-      const users = await prisma.user.findMany({ where: { deletedAt: null } });
+      const { role, search } = req.query;
+
+      console.log(`Received query - Role: ${role}, Search: ${search}`);
+
+      const whereCondition: any = { deletedAt: null };
+
+      if (role) {
+        const validRoles = ['ADMIN', 'CASHIER'];
+        if (!validRoles.includes(role.toString().toUpperCase())) {
+          return res.status(400).json({ error: 'Invalid role value' });
+        }
+        whereCondition.role = role.toString().toUpperCase(); // Convert to uppercase
+      }
+
+      if (search) {
+        whereCondition.fullName = {
+          contains: search.toString(),
+        };
+      }
+
+      console.log(`Final query conditions:`, whereCondition);
+
+      const users = await prisma.user.findMany({ where: whereCondition });
+
       res.status(200).json({
         success: true,
         data: users,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching users:', error);
       res.status(500).json({
         success: false,
@@ -18,6 +41,7 @@ export class UserController {
       });
     }
   }
+
   async createUser(req: Request, res: Response) {
     const { fullName, email, role, password } = req.body;
 

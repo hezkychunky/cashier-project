@@ -2,7 +2,8 @@
 
 import { Menu } from './components/menu';
 import { Checkout } from './components/checkout';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import debounce from 'lodash.debounce';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
@@ -10,14 +11,50 @@ export default function Cashier() {
   const [productsData, setProductsData] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      const response = await fetch(`${BASEURL}/api/product`);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const fetchProducts = async (category: string, search: string) => {
+    try {
+      let queryParams = new URLSearchParams();
+      if (category) queryParams.append('category', category);
+      if (search) queryParams.append('search', search);
+
+      const response = await fetch(
+        `${BASEURL}/api/product?${queryParams.toString()}`,
+      );
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
       const data = await response.json();
-      console.log(data);
       setProductsData(data.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
     }
-    fetchProducts();
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      fetchProducts(selectedCategory, query);
+    }, 500),
+    [selectedCategory],
+  );
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    fetchProducts(category, searchQuery);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query);
+  };
+
+  useEffect(() => {
+    fetchProducts(selectedCategory, searchQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddToCart = (item: CartItem) => {
@@ -26,14 +63,12 @@ export default function Cashier() {
         (cartItem) => cartItem.name === item.name,
       );
       if (existingItem) {
-        // Update quantity if item already exists in the cart
         return prevCart.map((cartItem) =>
           cartItem.name === item.name
             ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
             : cartItem,
         );
       }
-      // Add new item to the cart
       return [...prevCart, item];
     });
   };
@@ -79,7 +114,6 @@ export default function Cashier() {
       const result = await response.json();
       console.log('Order submitted successfully:', result);
 
-      // Clear the cart after successful submission
       setCart([]);
     } catch (error) {
       console.error('Error submitting order:', error);
@@ -90,6 +124,38 @@ export default function Cashier() {
     <div className="flex max-h-[565px] pl-14">
       <section className="w-3/4 bg-white shadow-lg p-4 rounded-lg ml-4 overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">Menu</h2>
+
+        {/* Filters */}
+        <div className="flex flex-wrap items-center space-x-4 mb-4">
+          {/* Search Input */}
+          <input
+            type="text"
+            placeholder="Search by Product Name..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="border p-2 rounded bg-white border-orange-500"
+          />
+
+          {/* Category Filter Buttons */}
+          <div className="flex space-x-2">
+            {['', 'COFFEE', 'CHOCOLATE', 'TEA'].map((category) => (
+              <button
+                key={category || 'ALL'}
+                onClick={() => handleCategoryChange(category)}
+                className={`px-4 py-2 rounded-md border ${
+                  selectedCategory === category
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-200'
+                } hover:bg-orange-400`}
+              >
+                {category
+                  ? category.charAt(0) + category.slice(1).toLowerCase()
+                  : 'All'}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <Menu productsData={productsData} onAddToCart={handleAddToCart} />
       </section>
       <section className="w-1/4 bg-white shadow-lg p-4 rounded-lg overflow-y-auto">
