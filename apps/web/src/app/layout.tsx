@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { usePathname } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from './context/authContext';
 
 const inter = Inter({ subsets: ['latin'] });
 const disabledHeader = ['/login'];
@@ -20,14 +21,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="max-h-screen">
-          {!disabledHeader.includes(pathName) && <Sidebar />}
-          <div className="flex flex-col max-h-screen">
-            {!disabledHeader.includes(pathName) && <Header />}
-            <ToastContainer />
-            <main className="w-full">{children}</main>
+        <AuthProvider>
+          <div className="max-h-screen">
+            {!disabledHeader.includes(pathName) && <Sidebar />}
+            <div className="flex flex-col max-h-screen">
+              {!disabledHeader.includes(pathName) && <Header />}
+              <ToastContainer />
+              <main className="w-full">{children}</main>
+            </div>
           </div>
-        </div>
+        </AuthProvider>
       </body>
     </html>
   );

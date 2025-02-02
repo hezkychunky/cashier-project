@@ -51,6 +51,7 @@ export default function EditUserModal({
         <h2 className="text-xl font-bold mb-4">Edit User</h2>
         <form onSubmit={formik.handleSubmit}>
           <div className="mb-2">
+            <label>Full Name: </label>
             <input
               name="fullName"
               type="text"
@@ -68,6 +69,7 @@ export default function EditUserModal({
           </div>
 
           <div className="mb-2">
+            <label>Email: </label>
             <input
               name="email"
               type="email"
@@ -83,6 +85,7 @@ export default function EditUserModal({
           </div>
 
           <div className="mb-2">
+            <label>Role: </label>
             <select
               name="role"
               className="p-2 border w-full"

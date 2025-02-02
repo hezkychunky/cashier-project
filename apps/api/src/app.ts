@@ -5,7 +5,6 @@ import express, {
   Request,
   Response,
   NextFunction,
-  Router,
 } from 'express';
 import cors from 'cors';
 import { PORT } from './config';
@@ -13,6 +12,7 @@ import { UserRouter } from './routers/user.router';
 import { ProductRouter } from './routers/product.router';
 import { OrderRouter } from './routers/order.router';
 import { AuthRouter } from './routers/auth.router';
+import { ShiftRouter } from './routers/shift.router';
 export default class App {
   private app: Express;
 
@@ -57,6 +57,7 @@ export default class App {
     const productRouter = new ProductRouter();
     const orderRouter = new OrderRouter();
     const authRouter = new AuthRouter();
+    const shiftRouter = new ShiftRouter();
     this.app.get('/api', (req: Request, res: Response) => {
       res.send(`Hello, Purwadhika Student API!`);
     });
@@ -65,6 +66,7 @@ export default class App {
     this.app.use('/api/product', productRouter.getRouter());
     this.app.use('/api/order', orderRouter.getRouter());
     this.app.use('/api/auth', authRouter.getRouter());
+    this.app.use('/api/shift', shiftRouter.getRouter());
   }
 
   public start(): void {

@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useAuth } from '../context/authContext';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function Login() {
+  const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const formik = useFormik({
@@ -19,7 +21,7 @@ export default function Login() {
         .email('Invalid email address')
         .required('Email is required'),
       password: Yup.string()
-        .min(8, 'Password must be at least 6 characters')
+        .min(8, 'Password must be at least 8 characters')
         .required('Password is required'),
     }),
     onSubmit: async (values) => {
@@ -36,12 +38,8 @@ export default function Login() {
           throw new Error(data.message || 'Login failed');
         }
 
-        // Store token
-        localStorage.setItem('token', data.token);
-        console.log('Login successful:', data);
-
-        // Redirect user (adjust this to your project needs)
-        window.location.href = '/cashier';
+        // Store token and user using useAuth()
+        login(data.token, data.user);
       } catch (err: any) {
         setError(err.message);
       }

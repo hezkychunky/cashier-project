@@ -4,15 +4,28 @@ import { Menu } from './components/menu';
 import { Checkout } from './components/checkout';
 import { useEffect, useState, useCallback } from 'react';
 import debounce from 'lodash.debounce';
+import Cookies from 'js-cookie';
+import { useAuth } from '@/app/context/authContext';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function Cashier() {
+  const { shift, fetchActiveShift } = useAuth();
   const [productsData, setProductsData] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [loading, setLoading] = useState(true); // ✅ Track loading state
+
+  // ✅ Sync shift state from Cookies on mount
+  useEffect(() => {
+    const storedShift = Cookies.get('activeShift');
+    if (storedShift) {
+      fetchActiveShift().finally(() => setLoading(false)); // ✅ Ensure UI waits
+    } else {
+      setLoading(false);
+    }
+  }, [fetchActiveShift]);
 
   const fetchProducts = async (category: string, search: string) => {
     try {
@@ -83,8 +96,13 @@ export default function Cashier() {
     paymentMethod: 'CASH' | 'DEBIT',
     paymentDetails: { cardNumber?: string; cashReceived?: string },
   ) => {
+    if (!shift) {
+      console.error('No active shift detected.');
+      return;
+    }
+
     const orderData = {
-      shiftId: 2, // Replace with the current active shift ID
+      shiftId: shift.id, // ✅ Use shift ID from useAuth (syncs with Cookies)
       cart: cart.map((item) => ({
         productId: item.id,
         quantity: item.quantity,
@@ -125,38 +143,52 @@ export default function Cashier() {
       <section className="w-3/4 bg-white shadow-lg p-4 rounded-lg ml-4 overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">Menu</h2>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center space-x-4 mb-4">
-          {/* Search Input */}
-          <input
-            type="text"
-            placeholder="Search by Product Name..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="border p-2 rounded bg-white border-orange-500"
-          />
+        {/* ✅ Show loading state until shift data is retrieved */}
+        {loading ? (
+          <p className="text-gray-500 font-semibold text-center py-4">
+            Loading data...
+          </p>
+        ) : !shift ? (
+          <p className="text-red-500 font-semibold text-center py-4 h-96">
+            Please start the shift first to begin transactions.
+          </p>
+        ) : (
+          <>
+            {/* Filters */}
+            <div className="flex flex-wrap items-center space-x-4 mb-4">
+              {/* Search Input */}
+              <input
+                type="text"
+                placeholder="Search by Product Name..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="border p-2 rounded bg-white border-orange-500"
+              />
 
-          {/* Category Filter Buttons */}
-          <div className="flex space-x-2">
-            {['', 'COFFEE', 'CHOCOLATE', 'TEA'].map((category) => (
-              <button
-                key={category || 'ALL'}
-                onClick={() => handleCategoryChange(category)}
-                className={`px-4 py-2 rounded-md border ${
-                  selectedCategory === category
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-gray-200'
-                } hover:bg-orange-400`}
-              >
-                {category
-                  ? category.charAt(0) + category.slice(1).toLowerCase()
-                  : 'All'}
-              </button>
-            ))}
-          </div>
-        </div>
+              {/* Category Filter Buttons */}
+              <div className="flex space-x-2">
+                {['', 'COFFEE', 'CHOCOLATE', 'TEA'].map((category) => (
+                  <button
+                    key={category || 'ALL'}
+                    onClick={() => handleCategoryChange(category)}
+                    className={`px-4 py-2 rounded-md border ${
+                      selectedCategory === category
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-gray-200'
+                    } hover:bg-orange-400`}
+                  >
+                    {category
+                      ? category.charAt(0) + category.slice(1).toLowerCase()
+                      : 'All'}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <Menu productsData={productsData} onAddToCart={handleAddToCart} />
+            {/* ✅ Only display menu when shift is active */}
+            <Menu productsData={productsData} onAddToCart={handleAddToCart} />
+          </>
+        )}
       </section>
       <section className="w-1/4 bg-white shadow-lg p-4 rounded-lg overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">Checkout</h2>

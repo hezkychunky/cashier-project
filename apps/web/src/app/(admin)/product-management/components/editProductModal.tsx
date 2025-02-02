@@ -55,6 +55,7 @@ export default function EditProductModal({
         <h2 className="text-xl font-bold mb-4">Edit Product</h2>
         <form onSubmit={formik.handleSubmit}>
           <div className="mb-2">
+            <label>Product Name: </label>
             <input
               name="name"
               type="text"
@@ -70,6 +71,7 @@ export default function EditProductModal({
           </div>
 
           <div className="mb-2">
+            <label>Category: </label>
             <select
               name="category"
               className="p-2 border w-full"
@@ -89,6 +91,7 @@ export default function EditProductModal({
           </div>
 
           <div className="mb-2">
+            <label>Price: </label>
             <input
               name="price"
               type="number"
@@ -104,6 +107,7 @@ export default function EditProductModal({
           </div>
 
           <div className="mb-2">
+            <label>Stock: </label>
             <input
               name="stock"
               type="number"

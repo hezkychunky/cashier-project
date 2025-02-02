@@ -95,8 +95,8 @@ export default function SalesAdmin() {
   }, [selectedDate]);
 
   return (
-    <div className="flex flex-col items-center h-auto bg-[#fffaf0] text-gray-800 py-4 gap-4">
-      <h1 className="font-bold">SALES & TRANSACTION</h1>
+    <div className="flex flex-col items-center h-auto bg-[#fffaf0] text-gray-800 ml-20 py-4 gap-4">
+      <h1 className="font-bold">DAILY SALES & TRANSACTIONS</h1>
       <DatePickerComponent
         selectedDate={selectedDate}
         onChange={handleDateChange}

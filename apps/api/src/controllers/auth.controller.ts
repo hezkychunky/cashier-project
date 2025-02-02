@@ -40,10 +40,29 @@ export class AuthController {
       res.status(200).json({
         success: true,
         token,
-        user: { id: user.id, email: user.email, role: user.role },
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          fullName: user.fullName,
+        },
       });
     } catch (error) {
       console.error('Login error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+  async logout(req: Request, res: Response) {
+    try {
+      res
+        .status(200)
+        .json({ success: true, message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error',

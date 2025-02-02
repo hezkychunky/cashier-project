@@ -97,7 +97,7 @@ export default function ProductManagement() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center h-auto bg-[#fffaf0] text-gray-800 py-4 gap-4">
+    <div className="flex flex-col items-center h-auto bg-[#fffaf0] text-gray-800 ml-20 py-4 gap-4">
       <h1 className="font-bold">PRODUCT MANAGEMENT</h1>
       <div className="flex space-x-4">
         <button
@@ -132,7 +132,7 @@ export default function ProductManagement() {
         {/* Sorting Button */}
         <button
           onClick={handleSortChange}
-          className="border p-2 rounded-lg bg-white border-orange-500 hover:bg-gray-400"
+          className="border p-2 rounded-lg bg-white border-orange-500 hover:bg-orange-500"
         >
           Sort by Stock ({sortOrder === 'asc' ? 'Low to High' : 'High to Low'})
         </button>
