@@ -1,4 +1,5 @@
 import { ProductController } from '@/controllers/products.controller';
+import { upload } from '@/middlewares/multerConfig';
 import { Router } from 'express';
 
 export class ProductRouter {
@@ -13,8 +14,13 @@ export class ProductRouter {
 
   private initializeRoutes(): void {
     this.router.get('/', this.productController.getProducts);
+    this.router.post('/upload', this.productController.uploadImage);
     this.router.post('/', this.productController.createProduct);
-    this.router.patch('/:id', this.productController.updateProduct);
+    this.router.patch(
+      '/:id',
+      upload.single('file'),
+      this.productController.updateProduct,
+    );
     this.router.delete('/delete/:id', this.productController.deleteProduct);
   }
 

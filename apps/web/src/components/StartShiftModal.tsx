@@ -23,7 +23,7 @@ export const StartShiftModal: React.FC<StartShiftModalProps> = ({
     validationSchema: Yup.object({
       amount: Yup.number()
         .typeError('Please enter a valid number')
-        .min(10000, 'Minimum amount is Rp 10,000')
+        .min(100000, 'Minimum amount is Rp 100,000')
         .required('Amount is required'),
       shiftType: Yup.string()
         .oneOf(['OPENING', 'CLOSING'])
@@ -64,7 +64,7 @@ export const StartShiftModal: React.FC<StartShiftModalProps> = ({
                   ? 'border-red-500'
                   : 'border-gray-300'
               }`}
-              placeholder="Rp 100,000"
+              placeholder="Rp 200,000"
               value={formik.values.amount}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}

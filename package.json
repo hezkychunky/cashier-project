@@ -15,6 +15,7 @@
     "@commitlint/config-conventional": "^18.4.2",
     "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.8",
+    "@types/multer": "^1.4.12",
     "eslint": "^8.48.0",
     "husky": "^8.0.0",
     "lint-staged": "^15.1.0",
@@ -40,6 +41,7 @@
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "yup": "^1.6.1"
   }
 }

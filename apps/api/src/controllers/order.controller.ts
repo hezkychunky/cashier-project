@@ -215,4 +215,63 @@ export class OrderController {
       res.status(500).json({ error: 'Internal server error' });
     }
   }
+  async getDailyOrderDetails(req: Request, res: Response) {
+    try {
+      const { date } = req.query;
+
+      if (!date) {
+        return res.status(400).json({ error: 'Date parameter is required.' });
+      }
+
+      const selectedDate = new Date(date as string);
+      const nextDay = new Date(selectedDate);
+      nextDay.setDate(selectedDate.getDate() + 1);
+
+      // Fetch orders with detailed order items for the selected date
+      const orders = await prisma.order.findMany({
+        where: {
+          createdAt: {
+            gte: selectedDate,
+            lt: nextDay,
+          },
+        },
+        include: {
+          orderItems: {
+            include: {
+              product: {
+                select: {
+                  name: true, // Get product name
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
+
+      if (!orders.length) {
+        return res
+          .status(404)
+          .json({ message: 'No orders found for this date' });
+      }
+
+      // Format the response
+      const formattedOrders = orders.map((order) => ({
+        id: order.id,
+        createdAt: order.createdAt,
+        items: order.orderItems.map((item) => ({
+          name: item.product.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      }));
+
+      res.status(200).json({ orders: formattedOrders });
+    } catch (error) {
+      console.error('Error fetching daily orders:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
 }

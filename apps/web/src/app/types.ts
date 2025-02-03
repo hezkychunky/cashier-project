@@ -3,7 +3,8 @@ type Product = {
   category: string | null;
   name: string | null;
   price: number | null;
-  stock: string | null;
+  stock: number;
+  image: string | null;
 };
 
 type User = {

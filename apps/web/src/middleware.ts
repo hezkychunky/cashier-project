@@ -51,7 +51,7 @@ export function middleware(req: NextRequest) {
     '/account-management',
     '/product-management',
   ];
-  const restrictedForAdmin = ['/cashier'];
+  const restrictedForAdmin = ['/cashier', '/sales-cashier'];
 
   if (
     userRole === 'CASHIER' &&
@@ -84,6 +84,7 @@ export const config = {
   matcher: [
     '/cashier/:path*',
     '/sales-admin/:path*',
+    '/sales-cashier/:path*',
     '/login',
     '/account-management/:path*',
     '/product-management/:path*',

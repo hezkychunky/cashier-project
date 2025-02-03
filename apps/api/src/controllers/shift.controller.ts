@@ -97,4 +97,44 @@ export class ShiftController {
       res.status(500).json({ message: 'Internal server error' });
     }
   }
+
+  async getTransactionSummary(req: Request, res: Response) {
+    try {
+      const { userId } = req.query;
+
+      if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' });
+      }
+
+      // Get the active shift for the user
+      const activeShift = await prisma.shift.findFirst({
+        where: { userId: Number(userId), isActive: true },
+        include: { orders: true },
+      });
+
+      if (!activeShift) {
+        return res.status(404).json({ message: 'No active shift found' });
+      }
+
+      // Aggregate transaction totals for cash & debit payments
+      const cashTotal = await prisma.order.aggregate({
+        where: { shiftId: activeShift.id, paymentMethod: 'CASH' },
+        _sum: { totalPrice: true },
+      });
+
+      const debitTotal = await prisma.order.aggregate({
+        where: { shiftId: activeShift.id, paymentMethod: 'DEBIT' },
+        _sum: { totalPrice: true },
+      });
+
+      res.status(200).json({
+        shiftId: activeShift.id,
+        cashTransactions: cashTotal._sum.totalPrice || 0,
+        debitTransactions: debitTotal._sum.totalPrice || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching transaction summary:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
 }

@@ -13,6 +13,7 @@ import { ProductRouter } from './routers/product.router';
 import { OrderRouter } from './routers/order.router';
 import { AuthRouter } from './routers/auth.router';
 import { ShiftRouter } from './routers/shift.router';
+import path from 'path';
 export default class App {
   private app: Express;
 
@@ -67,6 +68,10 @@ export default class App {
     this.app.use('/api/order', orderRouter.getRouter());
     this.app.use('/api/auth', authRouter.getRouter());
     this.app.use('/api/shift', shiftRouter.getRouter());
+    this.app.use(
+      '/uploads',
+      express.static(path.join(__dirname, '../../web/public/uploads')),
+    );
   }
 
   public start(): void {

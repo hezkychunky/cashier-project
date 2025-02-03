@@ -26,6 +26,7 @@ export class OrderRouter {
       '/daily-shift-summary',
       this.orderController.getDailyShiftSummary,
     );
+    this.router.get('/order-detail', this.orderController.getDailyOrderDetails);
   }
 
   getRouter(): Router {
