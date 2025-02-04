@@ -1,9 +1,5 @@
 import { ProductController } from '@/controllers/products.controller';
-import {
-  authorizeAdmin,
-  authorizeCashier,
-  verifyToken,
-} from '@/middlewares/auth.middleware';
+import { authorizeAdmin, verifyToken } from '@/middlewares/auth.middleware';
 import { upload } from '@/middlewares/multerConfig';
 import { Router } from 'express';
 

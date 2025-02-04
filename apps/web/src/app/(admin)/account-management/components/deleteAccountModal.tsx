@@ -14,7 +14,6 @@ export default function DeleteUserModal({
 }) {
   const handleDelete = async () => {
     try {
-      // ✅ Use fetchWithAuth for authenticated API requests
       const data = await fetchWithAuth(
         `${BASEURL}/api/user/delete/${user.id}`,
         {

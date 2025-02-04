@@ -48,7 +48,7 @@ export const Menu = ({ productsData, onAddToCart }: MenuProps) => {
           if (imageUrl?.startsWith('/uploads/')) {
             imageUrl = `${BASEURL}${imageUrl}`;
           } else if (!imageUrl) {
-            imageUrl = '/default-product.png'; // Use a default placeholder image
+            imageUrl = '/default-product.png';
           }
 
           return (

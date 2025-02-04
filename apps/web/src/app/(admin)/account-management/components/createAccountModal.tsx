@@ -31,7 +31,6 @@ export default function CreateUserModal({
     }),
     onSubmit: async (values) => {
       try {
-        // ✅ Use fetchWithAuth for authenticated API requests
         const data = await fetchWithAuth(`${BASEURL}/api/user`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

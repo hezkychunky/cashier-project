@@ -18,7 +18,6 @@ export class ShiftController {
           .json({ message: 'Invalid shift type. Must be OPENING or CLOSING' });
       }
 
-      // Create a new shift without checking for active shifts
       const shift = await prisma.shift.create({
         data: {
           userId,
@@ -39,7 +38,7 @@ export class ShiftController {
   async endShift(req: Request, res: Response) {
     try {
       const { shiftId } = req.params;
-      const { endCash } = req.body; // Optional parameter
+      const { endCash } = req.body;
 
       if (!shiftId) {
         return res.status(400).json({ message: 'Shift ID is required' });
@@ -53,12 +52,11 @@ export class ShiftController {
         return res.status(404).json({ message: 'No active shift found' });
       }
 
-      // Update shift to mark it as ended
       const updatedShift = await prisma.shift.update({
         where: { id: Number(shiftId) },
         data: {
           endTime: new Date(),
-          endCash: endCash || shift.startCash, // Default to startCash if endCash not provided
+          endCash: endCash || shift.startCash,
           isActive: false,
         },
       });
@@ -106,7 +104,6 @@ export class ShiftController {
         return res.status(400).json({ message: 'User ID is required' });
       }
 
-      // Get the active shift for the user
       const activeShift = await prisma.shift.findFirst({
         where: { userId: Number(userId), isActive: true },
         include: { orders: true },
@@ -116,7 +113,6 @@ export class ShiftController {
         return res.status(404).json({ message: 'No active shift found' });
       }
 
-      // Aggregate transaction totals for cash & debit payments
       const cashTotal = await prisma.order.aggregate({
         where: { shiftId: activeShift.id, paymentMethod: 'CASH' },
         _sum: { totalPrice: true },

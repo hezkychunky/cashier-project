@@ -4,7 +4,7 @@ type SuccessModalProps = {
   isOpen: boolean;
   onClose: () => void;
   paymentMethod: 'CASH' | 'DEBIT';
-  changeAmount?: number; // Optional, only relevant for CASH payment
+  changeAmount?: number;
 };
 
 export const SuccessModal = ({

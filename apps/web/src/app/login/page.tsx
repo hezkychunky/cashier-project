@@ -38,7 +38,6 @@ export default function Login() {
           throw new Error(data.message || 'Login failed');
         }
 
-        // Store token and user using useAuth()
         login(data.token, data.user);
       } catch (err: any) {
         setError(err.message);
@@ -54,7 +53,6 @@ export default function Login() {
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
-          {/* Email Input */}
           <div>
             <label
               htmlFor="email"
@@ -79,7 +77,6 @@ export default function Login() {
             )}
           </div>
 
-          {/* Password Input */}
           <div>
             <label
               htmlFor="password"
@@ -104,7 +101,6 @@ export default function Login() {
             )}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-orange-600 focus:outline-none focus:ring focus:ring-orange-300"

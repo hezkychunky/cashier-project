@@ -203,7 +203,9 @@ export default function ProductManagement() {
               <td className="py-3 px-1 border-slate-700">{index + 1}</td>
               <td className="py-3 px-1 border-slate-700">{product.name}</td>
               <td className="py-3 px-1 border-slate-700">{product.category}</td>
-              <td className="py-3 px-1 border-slate-700">{product.price}</td>
+              <td className="py-3 px-1 border-slate-700">
+                {product.price!.toLocaleString()}
+              </td>
               <td className="py-3 px-1 border-slate-700">{product.stock}</td>
               <td>
                 <div className="flex gap-1 justify-center">

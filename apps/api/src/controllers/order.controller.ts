@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
 export class OrderController {
-  // Fetch all orders
   async getOrder(req: Request, res: Response) {
     try {
       const orders = await prisma.order.findMany();
@@ -19,19 +18,17 @@ export class OrderController {
     }
   }
 
-  // Create a new order
   async createOrder(req: Request, res: Response) {
     const { shiftId, cart, paymentMethod, paymentDetails, totalPrice } =
       req.body;
 
     try {
-      // Create the Order
       const order = await prisma.order.create({
         data: {
           shiftId,
           totalPrice,
           paymentMethod,
-          paymentStatus: 'PAID', // Or 'UNPAID' depending on the business logic
+          paymentStatus: 'PAID',
           cardNumber:
             paymentMethod === 'DEBIT' ? paymentDetails.cardNumber : null,
           orderItems: {
@@ -50,7 +47,6 @@ export class OrderController {
         },
       });
 
-      // Reduce product stock
       for (const item of cart) {
         await prisma.product.update({
           where: { id: item.productId },
@@ -71,7 +67,6 @@ export class OrderController {
     }
   }
 
-  // Fetch daily transactions by date
   async getDailyTransactions(req: Request, res: Response) {
     try {
       const { date } = req.query;
@@ -84,7 +79,6 @@ export class OrderController {
       const nextDay = new Date(selectedDate);
       nextDay.setDate(selectedDate.getDate() + 1);
 
-      // Query to count transactions and sum totalPrice for the selected date
       const transactions = await prisma.order.aggregate({
         _count: { id: true },
         _sum: { totalPrice: true },
@@ -179,7 +173,7 @@ export class OrderController {
               fullName: true,
             },
           },
-          orders: true, // Include orders for aggregations
+          orders: true,
         },
       });
 
@@ -227,7 +221,6 @@ export class OrderController {
       const nextDay = new Date(selectedDate);
       nextDay.setDate(selectedDate.getDate() + 1);
 
-      // Fetch orders with detailed order items for the selected date
       const orders = await prisma.order.findMany({
         where: {
           createdAt: {
@@ -240,7 +233,7 @@ export class OrderController {
             include: {
               product: {
                 select: {
-                  name: true, // Get product name
+                  name: true,
                 },
               },
             },
@@ -257,7 +250,6 @@ export class OrderController {
           .json({ message: 'No orders found for this date' });
       }
 
-      // Format the response
       const formattedOrders = orders.map((order) => ({
         id: order.id,
         createdAt: order.createdAt,

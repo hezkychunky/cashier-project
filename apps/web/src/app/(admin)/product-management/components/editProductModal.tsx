@@ -111,47 +111,50 @@ export default function EditProductModal({
       <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
         <h2 className="text-xl font-bold mb-4">Edit Product</h2>
         <form onSubmit={formik.handleSubmit}>
-          {/* Name */}
-          <input
-            type="text"
-            className="p-2 border w-full mb-2"
-            {...formik.getFieldProps('name')}
-          />
-          {formik.touched.name && formik.errors.name && (
-            <div className="text-red-500 text-sm">{formik.errors.name}</div>
-          )}
-
-          {/* Category */}
-          <select
-            className="p-2 border w-full mb-2"
-            {...formik.getFieldProps('category')}
-          >
-            <option value="COFFEE">Coffee</option>
-            <option value="TEA">Tea</option>
-            <option value="CHOCOLATE">Chocolate</option>
-          </select>
-
-          {/* Price */}
-          <input
-            type="number"
-            className="p-2 border w-full mb-2"
-            {...formik.getFieldProps('price')}
-          />
-          {formik.touched.price && formik.errors.price && (
-            <div className="text-red-500 text-sm">{formik.errors.price}</div>
-          )}
-
-          {/* Stock */}
-          <input
-            type="number"
-            className="p-2 border w-full mb-2"
-            {...formik.getFieldProps('stock')}
-          />
-          {formik.touched.stock && formik.errors.stock && (
-            <div className="text-red-500 text-sm">{formik.errors.stock}</div>
-          )}
-
-          {/* Image Upload */}
+          <div className="flex items-center justify-between">
+            <label>Product Name:</label>
+            <input
+              type="text"
+              className="p-2 border w-52 mb-2"
+              {...formik.getFieldProps('name')}
+            />
+            {formik.touched.name && formik.errors.name && (
+              <div className="text-red-500 text-sm">{formik.errors.name}</div>
+            )}
+          </div>
+          <div className="flex items-center justify-between">
+            <label>Category:</label>
+            <select
+              className="p-2 border w-52 mb-2"
+              {...formik.getFieldProps('category')}
+            >
+              <option value="COFFEE">Coffee</option>
+              <option value="TEA">Tea</option>
+              <option value="CHOCOLATE">Chocolate</option>
+            </select>
+          </div>
+          <div className="flex items-center justify-between">
+            <label>Price:</label>
+            <input
+              type="number"
+              className="p-2 border w-52 mb-2"
+              {...formik.getFieldProps('price')}
+            />
+            {formik.touched.price && formik.errors.price && (
+              <div className="text-red-500 text-sm">{formik.errors.price}</div>
+            )}
+          </div>
+          <div className="flex items-center justify-between">
+            <label>Stock:</label>
+            <input
+              type="number"
+              className="p-2 border w-52 mb-2"
+              {...formik.getFieldProps('stock')}
+            />
+            {formik.touched.stock && formik.errors.stock && (
+              <div className="text-red-500 text-sm">{formik.errors.stock}</div>
+            )}
+          </div>
           <input
             type="file"
             accept="image/*"
@@ -159,7 +162,6 @@ export default function EditProductModal({
             className="mb-2"
           />
           {uploading && <p className="text-blue-500">Uploading image...</p>}
-
           {/* Image Preview */}
           {imageUrl && (
             <Image
@@ -170,7 +172,6 @@ export default function EditProductModal({
               className="w-32 mt-2 rounded-lg object-cover"
             />
           )}
-
           {/* Buttons */}
           <div className="flex justify-between mt-4">
             <button

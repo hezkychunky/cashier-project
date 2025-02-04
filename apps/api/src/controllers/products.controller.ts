@@ -39,7 +39,7 @@ export class ProductController {
       if (search) whereCondition.name = { contains: search.toString() };
 
       const currentPage = parseInt(page as string, 10) || 1;
-      const pageSize = parseInt(limit as string, 10) || 6; // Default 8 items per page
+      const pageSize = parseInt(limit as string, 10) || 6;
 
       const totalItems = await prisma.product.count({ where: whereCondition });
 
@@ -67,7 +67,6 @@ export class ProductController {
     }
   }
 
-  // ✅ Image Upload Handler
   async uploadImage(req: Request, res: Response) {
     upload.single('file')(req, res, async (err) => {
       if (err) {
@@ -87,13 +86,12 @@ export class ProductController {
       }
 
       console.log('✅ File uploaded successfully:', req.file.filename);
-      const imageUrl = `/uploads/${req.file.filename}`; // Store relative path
+      const imageUrl = `/uploads/${req.file.filename}`;
 
       res.status(201).json({ success: true, filePath: imageUrl });
     });
   }
 
-  // ✅ Create Product
   async createProduct(req: Request, res: Response) {
     try {
       const { name, category, price, stock, image } = req.body;
@@ -144,7 +142,6 @@ export class ProductController {
           req.file ? req.file.filename : 'No new image',
         );
 
-        // ✅ 1. Get existing product data
         const existingProduct = await prisma.product.findUnique({
           where: { id: parseInt(id, 10) },
         });
@@ -155,14 +152,11 @@ export class ProductController {
             .json({ success: false, message: 'Product not found' });
         }
 
-        // ✅ 2. Determine the correct image URL:
         let imageUrl = req.file
-          ? `/uploads/${req.file.filename}` // If new image uploaded, use it
-          : image || existingProduct.image; // Otherwise, use image from body or keep existing
-
+          ? `/uploads/${req.file.filename}`
+          : image || existingProduct.image;
         console.log('🖼 Final Image URL:', imageUrl);
 
-        // ✅ 3. Update product in database
         const updatedProduct = await prisma.product.update({
           where: { id: parseInt(id, 10) },
           data: {
@@ -170,11 +164,9 @@ export class ProductController {
             category: category || existingProduct.category,
             price: price !== undefined ? Number(price) : existingProduct.price,
             stock: stock !== undefined ? Number(stock) : existingProduct.stock,
-            image: imageUrl, // ✅ Fix overwriting issue
+            image: imageUrl,
           },
         });
-
-        console.log('✅ Updated Product:', updatedProduct); // Debugging
 
         res.status(200).json({ success: true, data: updatedProduct });
       } catch (error) {
@@ -186,7 +178,6 @@ export class ProductController {
     });
   }
 
-  // ✅ Delete Product (Soft Delete)
   async deleteProduct(req: Request, res: Response) {
     try {
       const { id } = req.params;

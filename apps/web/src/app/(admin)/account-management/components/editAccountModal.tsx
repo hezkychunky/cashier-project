@@ -29,7 +29,6 @@ export default function EditUserModal({
     }),
     onSubmit: async (values) => {
       try {
-        // ✅ Use fetchWithAuth for authenticated API requests
         const data = await fetchWithAuth(`${BASEURL}/api/user/${user.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },

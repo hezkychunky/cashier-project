@@ -1,40 +1,7 @@
-// import { Request, Response, NextFunction } from 'express';
-// import jwt from 'jsonwebtoken';
-// import dotenv from 'dotenv';
-
-// dotenv.config();
-
-// const SECRET_KEY = process.env.JWT_SECRET!;
-
-// export const verifyToken = (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) => {
-//   const token = req.headers.authorization?.split(' ')[1];
-
-//   if (!token) {
-//     return res
-//       .status(401)
-//       .json({ success: false, message: 'Access Denied. No token provided.' });
-//   }
-
-//   try {
-//     const decoded = jwt.verify(token, SECRET_KEY);
-//     (req as any).user = decoded;
-//     next();
-//   } catch (error) {
-//     return res
-//       .status(403)
-//       .json({ success: false, message: 'Invalid or expired token.' });
-//   }
-// };
-
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '@/prisma';
 
-// ✅ Define a Custom Interface for Request with User
 interface UserRequest extends Request {
   user?: {
     id: number;
@@ -46,7 +13,6 @@ interface UserRequest extends Request {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
-// ✅ Middleware to Verify JWT and Extract User Data
 export const verifyToken = async (
   req: UserRequest,
   res: Response,
@@ -64,7 +30,6 @@ export const verifyToken = async (
   try {
     const decoded: any = jwt.verify(token, JWT_SECRET);
 
-    // ✅ Ensure the token contains a valid `userId`
     if (!decoded.userId) {
       return res
         .status(401)
@@ -90,7 +55,6 @@ export const verifyToken = async (
   }
 };
 
-// ✅ Middleware to Authorize Only ADMIN Users
 export const authorizeAdmin = (
   req: UserRequest,
   res: Response,
@@ -104,7 +68,6 @@ export const authorizeAdmin = (
   next();
 };
 
-// ✅ Middleware to Authorize Only CASHIER Users
 export const authorizeCashier = (
   req: UserRequest,
   res: Response,

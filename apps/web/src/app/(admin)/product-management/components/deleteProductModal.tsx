@@ -14,7 +14,6 @@ export default function DeleteProductModal({
 }) {
   const handleDelete = async () => {
     try {
-      // ✅ Use fetchWithAuth for authentication
       const data = await fetchWithAuth(
         `${BASEURL}/api/product/delete/${product.id}`,
         {

@@ -16,7 +16,6 @@ export default function Cashier() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ✅ Read filter params from URL
   const categoryParam = searchParams.get('category') || '';
   const searchParam = searchParams.get('search') || '';
 
@@ -27,7 +26,6 @@ export default function Cashier() {
   const [searchQuery, setSearchQuery] = useState<string>(searchParam);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Sync shift state from Cookies on mount
   useEffect(() => {
     const storedShift = Cookies.get('activeShift');
     if (storedShift) {
@@ -55,7 +53,6 @@ export default function Cashier() {
     }
   };
 
-  // ✅ Update URL params without reloading the page
   const updateURLParams = (category: string, search: string) => {
     const params = new URLSearchParams();
     if (category) params.append('category', category);
@@ -69,17 +66,15 @@ export default function Cashier() {
       fetchProducts(selectedCategory, query);
       updateURLParams(selectedCategory, query);
     }, 500),
-    [selectedCategory], // ✅ Ensure latest category is used
+    [selectedCategory],
   );
 
-  // ✅ Handle category change
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     updateURLParams(category, searchQuery);
     fetchProducts(category, searchQuery);
   };
 
-  // ✅ Handle search input change with debounce
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -138,7 +133,6 @@ export default function Cashier() {
     };
 
     try {
-      // ✅ Use fetchWithAuth for authenticated API requests
       const result = await fetchWithAuth(`${BASEURL}/api/order`, {
         method: 'POST',
         headers: {
@@ -152,12 +146,12 @@ export default function Cashier() {
       }
 
       console.log('Order submitted successfully:', result);
-      setCart([]); // ✅ Clear cart after successful order
+      setCart([]);
     } catch (error) {
       console.error('Error submitting order:', error);
     }
 
-    fetchProducts(selectedCategory, searchQuery); // ✅ Re-fetch products after submission
+    fetchProducts(selectedCategory, searchQuery);
   };
 
   return (
@@ -165,7 +159,6 @@ export default function Cashier() {
       <section className="w-3/4 bg-white shadow-lg p-4 rounded-lg ml-4 overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">Menu</h2>
 
-        {/* ✅ Show loading state until shift data is retrieved */}
         {loading ? (
           <p className="text-gray-500 font-semibold text-center py-4">
             Loading data...
@@ -176,9 +169,7 @@ export default function Cashier() {
           </p>
         ) : (
           <>
-            {/* Filters */}
             <div className="flex flex-wrap items-center space-x-4 mb-4">
-              {/* Search Input */}
               <input
                 type="text"
                 placeholder="Search by Product Name..."
@@ -187,7 +178,6 @@ export default function Cashier() {
                 className="border p-2 rounded bg-white border-orange-500"
               />
 
-              {/* Category Filter Buttons */}
               <div className="flex space-x-2">
                 {['', 'COFFEE', 'CHOCOLATE', 'TEA'].map((category) => (
                   <button
@@ -207,7 +197,6 @@ export default function Cashier() {
               </div>
             </div>
 
-            {/* ✅ Only display menu when shift is active */}
             <Menu productsData={productsData} onAddToCart={handleAddToCart} />
           </>
         )}

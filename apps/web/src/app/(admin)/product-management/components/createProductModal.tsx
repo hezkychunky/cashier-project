@@ -16,10 +16,9 @@ export default function CreateProductModal({
   onClose: () => void;
   refreshProducts: () => void;
 }) {
-  const [file, setFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
-  const [imageUploaded, setImageUploaded] = useState<boolean>(false); // ✅ Track if image upload is completed
+  const [imageUploaded, setImageUploaded] = useState<boolean>(false);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -32,7 +31,6 @@ export default function CreateProductModal({
       try {
         setUploading(true);
 
-        // ✅ Use fetchWithAuth instead of fetch
         const data = await fetchWithAuth(`${BASEURL}/api/product/upload`, {
           method: 'POST',
           body: formData,
@@ -41,12 +39,11 @@ export default function CreateProductModal({
         if (!data || !data.filePath)
           throw new Error(data?.message || 'Failed to upload image.');
 
-        // ✅ Ensure correct URL format
         const imagePath = data.filePath.startsWith('/uploads/')
           ? `${BASEURL}${data.filePath}`
           : data.filePath;
 
-        setImageUrl(imagePath); // ✅ Absolute URL
+        setImageUrl(imagePath);
         setImageUploaded(true);
         toast.success('Image uploaded successfully!');
       } catch (error) {
@@ -57,7 +54,6 @@ export default function CreateProductModal({
     }
   };
 
-  // ✅ Form Submission
   const formik = useFormik({
     initialValues: { name: '', category: 'COFFEE', price: 0, stock: 0 },
     validationSchema: Yup.object({
@@ -72,7 +68,6 @@ export default function CreateProductModal({
     }),
     onSubmit: async (values) => {
       try {
-        // ✅ Use fetchWithAuth instead of fetch
         const data = await fetchWithAuth(`${BASEURL}/api/product`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -96,7 +91,7 @@ export default function CreateProductModal({
       <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
         <h2 className="text-xl font-bold mb-4">Create New Product</h2>
         <form onSubmit={formik.handleSubmit}>
-          {/* Name */}
+          <label>Product Name:</label>
           <input
             type="text"
             placeholder="Name"
@@ -106,8 +101,7 @@ export default function CreateProductModal({
           {formik.touched.name && formik.errors.name && (
             <div className="text-red-500 text-sm">{formik.errors.name}</div>
           )}
-
-          {/* Category */}
+          <label>Category:</label>
           <select
             className="p-2 border w-full mb-2"
             {...formik.getFieldProps('category')}
@@ -116,8 +110,7 @@ export default function CreateProductModal({
             <option value="TEA">Tea</option>
             <option value="CHOCOLATE">Chocolate</option>
           </select>
-
-          {/* Price */}
+          <label>Price:</label>
           <input
             type="number"
             placeholder="Price"
@@ -127,8 +120,7 @@ export default function CreateProductModal({
           {formik.touched.price && formik.errors.price && (
             <div className="text-red-500 text-sm">{formik.errors.price}</div>
           )}
-
-          {/* Stock */}
+          <label>Stock:</label>
           <input
             type="number"
             placeholder="Stock"
@@ -139,7 +131,6 @@ export default function CreateProductModal({
             <div className="text-red-500 text-sm">{formik.errors.stock}</div>
           )}
 
-          {/* Image Upload */}
           <input
             type="file"
             accept="image/*"
@@ -148,7 +139,6 @@ export default function CreateProductModal({
           />
           {uploading && <p className="text-blue-500">Uploading image...</p>}
 
-          {/* Display Uploaded Image */}
           {imageUrl && (
             <Image
               src={imageUrl}
@@ -156,18 +146,17 @@ export default function CreateProductModal({
               width={128}
               height={128}
               className="w-32 mt-2 rounded-lg object-cover"
-              unoptimized={true} // ✅ Bypass Next.js optimization for localhost images
+              unoptimized={true}
             />
           )}
 
-          {/* Buttons */}
           <div className="flex justify-between mt-4">
             <button
               type="submit"
               className="bg-orange-500 text-white px-4 py-2 rounded-md"
               disabled={
                 formik.isSubmitting || !formik.isValid || !imageUploaded
-              } // ✅ Fixed issue
+              }
             >
               Create
             </button>

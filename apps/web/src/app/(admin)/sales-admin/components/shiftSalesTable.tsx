@@ -37,9 +37,15 @@ export const ShiftSalesTable = ({ shiftSales }: ShiftSalesTableProps) => {
               <td className="py-2 px-1">{shift.shiftType}</td>
               <td className="py-2 px-1">{shift.fullName}</td>
               <td className="py-2 px-1">{shift.transactionCount}</td>
-              <td className="py-2 px-1">{shift.cashTotal.toLocaleString()}</td>
-              <td className="py-2 px-1">{shift.debitTotal.toLocaleString()}</td>
-              <td className="py-2 px-1">{shift.startCash.toLocaleString()}</td>
+              <td className="py-2 px-1">
+                Rp {shift.cashTotal.toLocaleString()}
+              </td>
+              <td className="py-2 px-1">
+                Rp {shift.debitTotal.toLocaleString()}
+              </td>
+              <td className="py-2 px-1">
+                Rp {shift.startCash.toLocaleString()}
+              </td>
               <td
                 className={
                   shift.endCash === shift.cashTotal + shift.startCash
@@ -47,7 +53,7 @@ export const ShiftSalesTable = ({ shiftSales }: ShiftSalesTableProps) => {
                     : 'py-2 px-1 text-red-500 font-extrabold animate-pulse'
                 }
               >
-                {shift.endCash?.toLocaleString() || '-'}
+                Rp {shift.endCash?.toLocaleString() || '-'}
               </td>
             </tr>
           ))}

@@ -27,7 +27,7 @@ export class UserController {
 
       const pageNum = parseInt(page as string, 10);
       const pageSize = parseInt(limit as string, 10);
-      const skip = (pageNum - 1) * pageSize; // ✅ Calculate offset
+      const skip = (pageNum - 1) * pageSize;
 
       const totalUsers = await prisma.user.count({ where: whereCondition });
 
