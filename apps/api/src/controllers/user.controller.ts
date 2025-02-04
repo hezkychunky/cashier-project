@@ -5,9 +5,11 @@ import bcrypt from 'bcrypt';
 export class UserController {
   async getUsers(req: Request, res: Response) {
     try {
-      const { role, search } = req.query;
+      const { role, search, page = '1', limit = '6' } = req.query;
 
-      console.log(`Received query - Role: ${role}, Search: ${search}`);
+      console.log(
+        `Received query - Role: ${role}, Search: ${search}, Page: ${page}, Limit: ${limit}`,
+      );
 
       const whereCondition: any = { deletedAt: null };
 
@@ -16,22 +18,31 @@ export class UserController {
         if (!validRoles.includes(role.toString().toUpperCase())) {
           return res.status(400).json({ error: 'Invalid role value' });
         }
-        whereCondition.role = role.toString().toUpperCase(); // Convert to uppercase
+        whereCondition.role = role.toString().toUpperCase();
       }
 
       if (search) {
-        whereCondition.fullName = {
-          contains: search.toString(),
-        };
+        whereCondition.fullName = { contains: search.toString() };
       }
 
-      console.log(`Final query conditions:`, whereCondition);
+      const pageNum = parseInt(page as string, 10);
+      const pageSize = parseInt(limit as string, 10);
+      const skip = (pageNum - 1) * pageSize; // ✅ Calculate offset
 
-      const users = await prisma.user.findMany({ where: whereCondition });
+      const totalUsers = await prisma.user.count({ where: whereCondition });
+
+      const users = await prisma.user.findMany({
+        where: whereCondition,
+        skip,
+        take: pageSize,
+      });
 
       res.status(200).json({
         success: true,
         data: users,
+        total: totalUsers,
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalUsers / pageSize),
       });
     } catch (error: any) {
       console.error('Error fetching users:', error);

@@ -5,18 +5,20 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
+import { fetchWithAuth } from '@/app/utils/fetchWithAuth';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function EditProductModal({
   product,
   onClose,
+  refreshProducts,
 }: {
   product: Product;
   onClose: () => void;
+  refreshProducts: () => void;
 }) {
   // ✅ Initial image state with existing product image
-  const [file, setFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(
     product.image ? product.image : null,
   );
@@ -34,20 +36,23 @@ export default function EditProductModal({
 
       try {
         setUploading(true);
-        const response = await fetch(`${BASEURL}/api/product/upload`, {
+
+        // ✅ Use fetchWithAuth for authentication
+        const data = await fetchWithAuth(`${BASEURL}/api/product/upload`, {
           method: 'POST',
           body: formData,
         });
 
-        const data = await response.json();
-        if (!response.ok || !data.filePath)
+        if (!data || !data.filePath) {
           throw new Error('Failed to upload image.');
+        }
 
-        setImageUrl(`${data.filePath}`); // ✅ Update the state with new image URL
-        setImageUploaded(true); // ✅ Mark that a new image was uploaded
+        setImageUrl(`${data.filePath}`); // ✅ Update image URL state
+        setImageUploaded(true); // ✅ Mark as uploaded
         toast.success('Image uploaded successfully!');
       } catch (error) {
         toast.error('Failed to upload image.');
+        console.error('Error uploading image:', error);
       } finally {
         setUploading(false);
       }
@@ -74,21 +79,29 @@ export default function EditProductModal({
     }),
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${BASEURL}/api/product/${product.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...values,
-            image: imageUrl, // ✅ Include the updated image URL
-          }),
-        });
+        // ✅ Use fetchWithAuth to send authenticated request
+        const data = await fetchWithAuth(
+          `${BASEURL}/api/product/${product.id}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...values,
+              image: imageUrl, // ✅ Include updated image URL
+            }),
+          },
+        );
 
-        if (!response.ok) throw new Error('Failed to update product');
+        if (!data || !data.success) {
+          throw new Error('Failed to update product');
+        }
 
         toast.success('Product updated successfully!');
+        refreshProducts();
         onClose();
       } catch (error) {
         toast.error('Error updating product.');
+        console.error('Error updating product:', error);
       }
     },
   });

@@ -5,20 +5,22 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
+import { fetchWithAuth } from '@/app/utils/fetchWithAuth';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function CreateProductModal({
   onClose,
+  refreshProducts,
 }: {
   onClose: () => void;
+  refreshProducts: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
   const [imageUploaded, setImageUploaded] = useState<boolean>(false); // ✅ Track if image upload is completed
 
-  // ✅ Handle File Upload
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -29,14 +31,15 @@ export default function CreateProductModal({
 
       try {
         setUploading(true);
-        const response = await fetch(`${BASEURL}/api/product/upload`, {
+
+        // ✅ Use fetchWithAuth instead of fetch
+        const data = await fetchWithAuth(`${BASEURL}/api/product/upload`, {
           method: 'POST',
           body: formData,
         });
 
-        const data = await response.json();
-        if (!response.ok || !data.filePath)
-          throw new Error(data.message || 'Failed to upload image.');
+        if (!data || !data.filePath)
+          throw new Error(data?.message || 'Failed to upload image.');
 
         // ✅ Ensure correct URL format
         const imagePath = data.filePath.startsWith('/uploads/')
@@ -69,14 +72,18 @@ export default function CreateProductModal({
     }),
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${BASEURL}/api/product`, {
+        // ✅ Use fetchWithAuth instead of fetch
+        const data = await fetchWithAuth(`${BASEURL}/api/product`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...values, image: imageUrl }),
         });
 
-        if (!response.ok) throw new Error('Failed to create product');
+        if (!data || !data.success)
+          throw new Error(data?.message || 'Failed to create product');
+
         toast.success('Product created successfully!');
+        refreshProducts();
         onClose();
       } catch (error) {
         toast.error('Error creating product.');

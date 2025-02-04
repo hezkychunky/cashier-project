@@ -1,15 +1,18 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
+import { fetchWithAuth } from '@/app/utils/fetchWithAuth';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function EditUserModal({
   user,
   onClose,
+  refreshUsers,
 }: {
   user: User;
   onClose: () => void;
+  refreshUsers: () => void;
 }) {
   const formik = useFormik({
     initialValues: {
@@ -26,17 +29,19 @@ export default function EditUserModal({
     }),
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${BASEURL}/api/user/${user.id}`, {
+        // ✅ Use fetchWithAuth for authenticated API requests
+        const data = await fetchWithAuth(`${BASEURL}/api/user/${user.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
 
-        if (!response.ok) {
+        if (!data || !data.success) {
           throw new Error('Failed to update user');
         }
 
         toast.success('User updated successfully!');
+        refreshUsers();
         onClose();
       } catch (error) {
         toast.error('Error updating user');

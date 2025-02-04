@@ -4,7 +4,6 @@ import type { NextRequest } from 'next/server';
 export function middleware(req: NextRequest) {
   console.log('✅ Middleware executed for:', req.nextUrl.pathname);
 
-  // Read authentication cookies
   const token = req.cookies.get('token')?.value || null;
   const userRole = req.cookies.get('userRole')?.value || null;
 
@@ -14,7 +13,6 @@ export function middleware(req: NextRequest) {
   console.log('🔎 Token:', token ? 'Exists' : 'None');
   console.log('🔎 User Role:', userRole || 'None');
 
-  // 🛑 Prevent Middleware from Affecting API or Static Files
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
@@ -23,7 +21,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 🔐 Redirect Unauthorized Users to Login
   if (!token) {
     if (!isAuthPage) {
       console.log('🚫 No token found. Redirecting to /login.');
@@ -32,7 +29,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 🔄 Redirect Authenticated Users from /login to Their Dashboard
   if (isAuthPage) {
     if (userRole === 'CASHIER') {
       console.log('🔄 Redirecting CASHIER to /cashier.');
@@ -45,7 +41,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  // 🛑 Role-Based Page Restrictions
   const restrictedForCashier = [
     '/sales-admin',
     '/account-management',
@@ -79,7 +74,6 @@ export function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-// 🏗 Apply Middleware Only to Relevant Pages
 export const config = {
   matcher: [
     '/cashier/:path*',

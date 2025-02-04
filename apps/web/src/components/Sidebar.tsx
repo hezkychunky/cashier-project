@@ -23,7 +23,6 @@ export const Sidebar = () => {
         </h1>
       </div>
 
-      {/* Render Cashier Links only for CASHIER users */}
       {userRole === 'CASHIER' && (
         <div className="flex flex-col gap-4">
           <Link href={'/cashier'}>
@@ -39,7 +38,6 @@ export const Sidebar = () => {
         </div>
       )}
 
-      {/* Render Admin Links only for ADMIN users */}
       {userRole === 'ADMIN' && (
         <div className="flex flex-col gap-4">
           <Link href={'/sales-admin'}>

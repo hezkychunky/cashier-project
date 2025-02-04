@@ -14,7 +14,7 @@ export const Header = () => {
 
   useEffect(() => {
     setUserRole(Cookies.get('userRole') || null);
-  }, [user, shift]); // ✅ Ensure UI updates when shift changes
+  }, [user, shift]);
 
   return (
     <header className="bg-orange-500 text-white p-4 flex justify-even items-center sticky top-0 z-30">
@@ -45,7 +45,6 @@ export const Header = () => {
             </button>
           ))}
 
-        {/* Always show "Logout" button */}
         {user && (
           <button
             onClick={logout}
@@ -56,14 +55,12 @@ export const Header = () => {
         )}
       </div>
 
-      {/* Start Shift Confirmation Modal */}
       <StartShiftModal
         isVisible={isStartModalVisible}
         onClose={() => setIsStartModalVisible(false)}
         onConfirm={startShift}
       />
 
-      {/* End Shift Confirmation Modal */}
       <EndShiftModal
         isVisible={isEndModalVisible}
         onClose={() => setIsEndModalVisible(false)}

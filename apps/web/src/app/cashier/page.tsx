@@ -3,25 +3,35 @@
 import { Menu } from './components/menu';
 import { Checkout } from './components/checkout';
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import Cookies from 'js-cookie';
 import { useAuth } from '@/app/context/authContext';
+import { fetchWithAuth } from '../utils/fetchWithAuth';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function Cashier() {
   const { shift, fetchActiveShift } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ✅ Read filter params from URL
+  const categoryParam = searchParams.get('category') || '';
+  const searchParam = searchParams.get('search') || '';
+
   const [productsData, setProductsData] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [loading, setLoading] = useState(true); // ✅ Track loading state
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>(categoryParam);
+  const [searchQuery, setSearchQuery] = useState<string>(searchParam);
+  const [loading, setLoading] = useState(true);
 
   // ✅ Sync shift state from Cookies on mount
   useEffect(() => {
     const storedShift = Cookies.get('activeShift');
     if (storedShift) {
-      fetchActiveShift().finally(() => setLoading(false)); // ✅ Ensure UI waits
+      fetchActiveShift().finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
@@ -33,32 +43,43 @@ export default function Cashier() {
       if (category) queryParams.append('category', category);
       if (search) queryParams.append('search', search);
 
-      const response = await fetch(
-        `${BASEURL}/api/product?${queryParams.toString()}`,
+      const data = await fetchWithAuth(
+        `${BASEURL}/api/product/menu?${queryParams.toString()}`,
       );
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+
+      if (data) {
+        setProductsData(data.data);
       }
-      const data = await response.json();
-      setProductsData(data.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
   };
 
+  // ✅ Update URL params without reloading the page
+  const updateURLParams = (category: string, search: string) => {
+    const params = new URLSearchParams();
+    if (category) params.append('category', category);
+    if (search) params.append('search', search);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
-    debounce((query) => {
+    debounce((query: string) => {
       fetchProducts(selectedCategory, query);
+      updateURLParams(selectedCategory, query);
     }, 500),
-    [selectedCategory],
+    [selectedCategory], // ✅ Ensure latest category is used
   );
 
+  // ✅ Handle category change
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+    updateURLParams(category, searchQuery);
     fetchProducts(category, searchQuery);
   };
 
+  // ✅ Handle search input change with debounce
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -68,7 +89,7 @@ export default function Cashier() {
   useEffect(() => {
     fetchProducts(selectedCategory, searchQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedCategory]);
 
   const handleAddToCart = (item: CartItem) => {
     setCart((prevCart) => {
@@ -102,7 +123,7 @@ export default function Cashier() {
     }
 
     const orderData = {
-      shiftId: shift.id, // ✅ Use shift ID from useAuth (syncs with Cookies)
+      shiftId: shift.id,
       cart: cart.map((item) => ({
         productId: item.id,
         quantity: item.quantity,
@@ -117,7 +138,8 @@ export default function Cashier() {
     };
 
     try {
-      const response = await fetch(`${BASEURL}/api/order`, {
+      // ✅ Use fetchWithAuth for authenticated API requests
+      const result = await fetchWithAuth(`${BASEURL}/api/order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,17 +147,17 @@ export default function Cashier() {
         body: JSON.stringify(orderData),
       });
 
-      if (!response.ok) {
+      if (!result || !result.success) {
         throw new Error('Failed to submit the order.');
       }
 
-      const result = await response.json();
       console.log('Order submitted successfully:', result);
-
-      setCart([]);
+      setCart([]); // ✅ Clear cart after successful order
     } catch (error) {
       console.error('Error submitting order:', error);
     }
+
+    fetchProducts(selectedCategory, searchQuery); // ✅ Re-fetch products after submission
   };
 
   return (

@@ -2,77 +2,131 @@
 
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { IoCreateOutline, IoAddCircleOutline } from 'react-icons/io5';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import CreateProductModal from './components/createProductModal';
 import EditProductModal from './components/editProductModal';
 import DeleteProductModal from './components/deleteProductModal';
-import debounce from 'lodash.debounce'; // Import debounce function
+import debounce from 'lodash.debounce';
+import ResetFiltersButton from '@/components/ResetFiltersButton';
+import PaginationControls from '@/components/PaginationControls';
+import { fetchWithAuth } from '@/app/utils/fetchWithAuth';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
 export default function ProductManagement() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const categoryParam = searchParams.get('category') || '';
+  const searchParam = searchParams.get('search') || '';
+  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+  const validSortOptions: ('asc' | 'desc')[] = ['asc', 'desc'];
+  const sortParam = validSortOptions.includes(
+    searchParams.get('sort') as 'asc' | 'desc',
+  )
+    ? (searchParams.get('sort') as 'asc' | 'desc')
+    : 'asc';
+
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(pageParam);
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>(categoryParam);
+  const [searchQuery, setSearchQuery] = useState<string>(searchParam);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(
+    sortParam as 'asc' | 'desc',
+  );
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(searchParam);
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // State for filtering, searching, and sorting
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-
-  // Fetch products with filters, search, and sorting
   const fetchProducts = async (
     category: string,
     search: string,
     sort: 'asc' | 'desc',
+    page: number,
   ) => {
     try {
       let queryParams = new URLSearchParams();
       if (category) queryParams.append('category', category);
       if (search) queryParams.append('search', search);
       if (sort) queryParams.append('sort', sort);
+      queryParams.append('page', page.toString());
 
-      const response = await fetch(
-        `${BASEURL}/api/product?${queryParams.toString()}`,
-      );
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      const url = `${BASEURL}/api/product?${queryParams.toString()}`;
+
+      const data = await fetchWithAuth(url);
+
+      if (data) {
+        setProducts(data.data);
+        setTotalPages(data.totalPages);
+        setCurrentPage(data.currentPage);
       }
-      const data = await response.json();
-      setProducts(data.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSearch = useCallback(
-    debounce((query) => {
-      fetchProducts(selectedCategory, query, sortOrder);
-    }, 1000),
-    [selectedCategory, sortOrder],
-  );
+  const updateFilters = (
+    category: string,
+    search: string,
+    sort: 'asc' | 'desc',
+    page: number,
+  ) => {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (search) params.set('search', search);
+    params.set('sort', sort);
+    params.set('page', page.toString());
+
+    router.push(`?${params.toString()}`);
+    fetchProducts(category, search, sort, page);
+  };
+
+  useEffect(() => {
+    fetchProducts(
+      searchParams.get('category') || '',
+      searchParams.get('search') || '',
+      sortParam,
+      pageParam,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  useEffect(() => {
+    const handler = debounce(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500); // Delay: 500ms
+
+    handler();
+    return () => handler.cancel();
+  }, [searchQuery]);
+
+  useEffect(() => {
+    updateFilters(selectedCategory, debouncedSearch, sortOrder, 1);
+  }, [debouncedSearch, selectedCategory, sortOrder]);
 
   const handleCategoryChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const category = event.target.value;
     setSelectedCategory(category);
-    fetchProducts(category, searchQuery, sortOrder);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    setSearchQuery(query);
-    debouncedSearch(query);
+    setSearchQuery(event.target.value);
   };
 
   const handleSortChange = () => {
-    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-    setSortOrder(newSortOrder);
-    fetchProducts(selectedCategory, searchQuery, newSortOrder);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  const refreshProducts = () => {
+    fetchProducts(selectedCategory, debouncedSearch, sortOrder, pageParam);
   };
 
   const openCreateModal = () => setIsCreateModalOpen(true);
@@ -91,14 +145,10 @@ export default function ProductManagement() {
     setSelectedProduct(null);
   };
 
-  useEffect(() => {
-    fetchProducts(selectedCategory, searchQuery, sortOrder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
-    <div className="flex flex-col items-center h-auto bg-[#fffaf0] text-gray-800 ml-20 py-4 gap-4">
+    <div className="flex flex-col items-center h-auto bg-white text-gray-800 ml-20 py-4 gap-4">
       <h1 className="font-bold">PRODUCT MANAGEMENT</h1>
+
       <div className="flex space-x-4">
         <button
           onClick={openCreateModal}
@@ -108,7 +158,6 @@ export default function ProductManagement() {
           <IoAddCircleOutline size={30} />
         </button>
 
-        {/* Category Filter */}
         <select
           value={selectedCategory}
           onChange={handleCategoryChange}
@@ -120,7 +169,6 @@ export default function ProductManagement() {
           <option value="CHOCOLATE">Chocolate</option>
         </select>
 
-        {/* Search Input */}
         <input
           type="text"
           placeholder="Search by Product Name..."
@@ -129,13 +177,13 @@ export default function ProductManagement() {
           className="border p-2 rounded-lg bg-white border-orange-500"
         />
 
-        {/* Sorting Button */}
         <button
           onClick={handleSortChange}
           className="border p-2 rounded-lg bg-white border-orange-500 hover:bg-orange-500"
         >
           Sort by Stock ({sortOrder === 'asc' ? 'Low to High' : 'High to Low'})
         </button>
+        <ResetFiltersButton />
       </div>
 
       <table className="w-4/5 border-slate-700">
@@ -177,14 +225,27 @@ export default function ProductManagement() {
           ))}
         </tbody>
       </table>
-
+      <PaginationControls totalPages={totalPages} currentPage={currentPage} />
       {/* Modals */}
-      {isCreateModalOpen && <CreateProductModal onClose={closeModal} />}
+      {isCreateModalOpen && (
+        <CreateProductModal
+          onClose={closeModal}
+          refreshProducts={refreshProducts}
+        />
+      )}
       {isEditModalOpen && selectedProduct && (
-        <EditProductModal product={selectedProduct} onClose={closeModal} />
+        <EditProductModal
+          product={selectedProduct}
+          onClose={closeModal}
+          refreshProducts={refreshProducts}
+        />
       )}
       {isDeleteModalOpen && selectedProduct && (
-        <DeleteProductModal product={selectedProduct} onClose={closeModal} />
+        <DeleteProductModal
+          product={selectedProduct}
+          onClose={closeModal}
+          refreshProducts={refreshProducts}
+        />
       )}
     </div>
   );

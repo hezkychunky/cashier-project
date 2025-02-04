@@ -14,7 +14,6 @@ export const StartShiftModal: React.FC<StartShiftModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  // Formik setup for validation
   const formik = useFormik({
     initialValues: {
       amount: '',
@@ -49,9 +48,7 @@ export const StartShiftModal: React.FC<StartShiftModalProps> = ({
           Enter the starting cash amount (Rp) and select shift type:
         </p>
 
-        {/* Form */}
         <form onSubmit={formik.handleSubmit}>
-          {/* Amount Input */}
           <div className="mb-4">
             <label className="block text-gray-800 font-medium">
               Starting Cash (Rp)
@@ -76,7 +73,6 @@ export const StartShiftModal: React.FC<StartShiftModalProps> = ({
             )}
           </div>
 
-          {/* Shift Type Select */}
           <div className="mb-4">
             <label className="block text-gray-700 font-medium">Shift</label>
             <select
@@ -100,7 +96,6 @@ export const StartShiftModal: React.FC<StartShiftModalProps> = ({
             )}
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end gap-2">
             <button
               type="button"

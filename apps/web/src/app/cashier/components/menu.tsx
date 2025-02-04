@@ -57,7 +57,7 @@ export const Menu = ({ productsData, onAddToCart }: MenuProps) => {
               className="border rounded-lg p-4 text-center shadow hover:shadow-md hover:bg-orange-500 cursor-pointer"
               onClick={() => handleProductClick(product)}
             >
-              <div className="relative h-20 w-full flex items-center justify-center">
+              <div className="relative h-30 w-full flex items-center justify-center">
                 {imageUrl ? (
                   <Image
                     src={imageUrl}

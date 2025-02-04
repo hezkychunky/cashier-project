@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '@/app/utils/fetchWithAuth';
 import { toast } from 'react-toastify';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
@@ -5,21 +6,28 @@ const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 export default function DeleteUserModal({
   user,
   onClose,
+  refreshUsers,
 }: {
   user: User;
   onClose: () => void;
+  refreshUsers: () => void;
 }) {
   const handleDelete = async () => {
     try {
-      const response = await fetch(`${BASEURL}/api/user/delete/${user.id}`, {
-        method: 'PATCH',
-      });
+      // ✅ Use fetchWithAuth for authenticated API requests
+      const data = await fetchWithAuth(
+        `${BASEURL}/api/user/delete/${user.id}`,
+        {
+          method: 'PATCH',
+        },
+      );
 
-      if (!response.ok) {
+      if (!data || !data.success) {
         throw new Error('Failed to delete user');
       }
 
       toast.success(`${user.fullName} deleted successfully!`);
+      refreshUsers();
       onClose();
     } catch (error) {
       toast.error(`Error deleting ${user.fullName}`);

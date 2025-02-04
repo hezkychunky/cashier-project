@@ -20,16 +20,6 @@ interface User {
   fullName: string;
 }
 
-interface Shift {
-  id: number;
-  userId: number;
-  shiftType: 'OPENING' | 'CLOSING';
-  startTime: string;
-  startCash: number;
-  isActive: boolean;
-}
-
-// Define auth context type
 interface AuthContextType {
   user: User | null;
   shift: Shift | null;
@@ -43,16 +33,13 @@ interface AuthContextType {
   endShift: (endCash: number) => Promise<void>;
 }
 
-// Create AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// AuthProvider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [shift, setShift] = useState<Shift | null>(null);
 
-  // ✅ Restore user from cookies when page reloads
   const refreshAuth = useCallback(() => {
     const token = Cookies.get('token');
     const userData = Cookies.get('user')
@@ -63,19 +50,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       : null;
 
     if (token && userData) {
-      setUser(userData); // ✅ Restore user from cookies
+      setUser(userData);
     } else {
       setUser(null);
     }
 
     if (activeShift) {
-      setShift(activeShift); // ✅ Restore shift from cookies
+      setShift(activeShift);
     } else {
       setShift(null);
     }
   }, []);
 
-  // ✅ Fetch active shift after login or page refresh
   const fetchActiveShift = useCallback(async () => {
     if (!user) return;
 
@@ -89,11 +75,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setShift(data.shift);
     } catch (error) {
       console.error('Error fetching active shift:', error);
-      setShift(null); // Ensure shift state resets when no active shift exists
+      setShift(null);
     }
   }, [user]);
 
-  // ✅ Start a new shift
   const startShift = useCallback(
     async (amount: number, shiftType: 'OPENING' | 'CLOSING') => {
       if (!user) return;
@@ -115,9 +100,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           throw new Error(data.message || 'Failed to start shift');
 
         console.log('Shift started:', data);
-        setShift(data.shift); // ✅ Update shift state immediately
+        setShift(data.shift);
 
-        // ✅ Store shift data in cookies for persistence
         Cookies.set('activeShift', JSON.stringify(data.shift), { expires: 1 });
       } catch (error) {
         console.error('Error starting shift:', error);
@@ -126,7 +110,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [user],
   );
 
-  // ✅ End an active shift
   const endShift = useCallback(
     async (endCash: number) => {
       if (!shift) return;
@@ -135,12 +118,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await fetch(`${BASEURL}/api/shift/${shift.id}/end`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endCash }), // ✅ Send `endCash` in request
+          body: JSON.stringify({ endCash }),
         });
 
         if (response.ok) {
-          setShift(null); // ✅ Clear shift state
-          Cookies.remove('activeShift'); // ✅ Remove shift from cookies
+          setShift(null);
+          Cookies.remove('activeShift');
           console.log('Shift ended successfully');
         }
       } catch (error) {
@@ -150,7 +133,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [shift],
   );
 
-  // ✅ Handle login & store user data in cookies
   const login = useCallback(
     (token: string, user: User) => {
       Cookies.set('token', token, { expires: 1 });
@@ -158,13 +140,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       Cookies.set('user', JSON.stringify(user), { expires: 1 });
 
       setUser(user);
-      fetchActiveShift(); // ✅ Fetch shift data after login
+      fetchActiveShift();
       router.push(user.role === 'CASHIER' ? '/cashier' : '/sales-admin');
     },
     [fetchActiveShift, router],
   );
 
-  // ✅ Handle logout & clear user data
   const logout = useCallback(() => {
     Cookies.remove('token');
     Cookies.remove('userRole');
@@ -175,7 +156,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push('/login');
   }, [router]);
 
-  // ✅ Restore user & fetch active shift on page reload
   useEffect(() => {
     refreshAuth();
   }, [refreshAuth]);
@@ -201,7 +181,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook to use AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

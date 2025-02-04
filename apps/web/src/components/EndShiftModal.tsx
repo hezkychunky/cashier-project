@@ -14,7 +14,6 @@ export const EndShiftModal: React.FC<EndShiftModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  // Formik setup for validation
   const formik = useFormik({
     initialValues: {
       endCash: '',
@@ -40,9 +39,7 @@ export const EndShiftModal: React.FC<EndShiftModalProps> = ({
         <h2 className="text-xl font-bold text-gray-800 mb-4">End Shift</h2>
         <p className="text-gray-600 mb-4">Enter the final cash amount (Rp):</p>
 
-        {/* Form */}
         <form onSubmit={formik.handleSubmit}>
-          {/* End Cash Input */}
           <div className="mb-4">
             <label className="block text-gray-800 font-medium">
               Ending Cash (Rp)
@@ -67,7 +64,6 @@ export const EndShiftModal: React.FC<EndShiftModalProps> = ({
             )}
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end gap-2">
             <button
               type="button"

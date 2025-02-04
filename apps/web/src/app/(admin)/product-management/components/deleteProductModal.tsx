@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '@/app/utils/fetchWithAuth';
 import { toast } from 'react-toastify';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
@@ -5,24 +6,28 @@ const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 export default function DeleteProductModal({
   product,
   onClose,
+  refreshProducts,
 }: {
   product: Product;
   onClose: () => void;
+  refreshProducts: () => void;
 }) {
   const handleDelete = async () => {
     try {
-      const response = await fetch(
+      // ✅ Use fetchWithAuth for authentication
+      const data = await fetchWithAuth(
         `${BASEURL}/api/product/delete/${product.id}`,
         {
           method: 'DELETE',
         },
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to delete product');
+      if (!data || !data.success) {
+        throw new Error(data?.message || 'Failed to delete product');
       }
 
       toast.success(`${product.name} deleted successfully!`);
+      refreshProducts();
       onClose();
     } catch (error) {
       toast.error(`Error deleting ${product.name}`);

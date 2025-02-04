@@ -1,10 +1,17 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
+import { fetchWithAuth } from '@/app/utils/fetchWithAuth';
 
 const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
-export default function CreateUserModal({ onClose }: { onClose: () => void }) {
+export default function CreateUserModal({
+  onClose,
+  refreshUsers,
+}: {
+  onClose: () => void;
+  refreshUsers: () => void;
+}) {
   const formik = useFormik({
     initialValues: {
       fullName: '',
@@ -24,17 +31,19 @@ export default function CreateUserModal({ onClose }: { onClose: () => void }) {
     }),
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${BASEURL}/api/user`, {
+        // ✅ Use fetchWithAuth for authenticated API requests
+        const data = await fetchWithAuth(`${BASEURL}/api/user`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
 
-        if (!response.ok) {
+        if (!data || !data.success) {
           throw new Error('Failed to create user');
         }
 
         toast.success('User created successfully!');
+        refreshUsers();
         onClose();
       } catch (error) {
         toast.error('Error creating user');
