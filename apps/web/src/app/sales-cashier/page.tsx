@@ -75,7 +75,7 @@ export default function SalesCashier() {
   };
 
   return (
-    <div className="flex flex-col items-center h-auto bg-white text-gray-800 py-10 gap-4 w-screen">
+    <div className="flex flex-col items-center h-auto bg-white text-gray-800 py-10 gap-4 w-screen pl-16">
       {loading ? (
         <p className="text-gray-600">Loading transactions...</p>
       ) : (

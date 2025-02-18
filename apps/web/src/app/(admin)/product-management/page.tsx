@@ -108,6 +108,7 @@ export default function ProductManagement() {
 
   useEffect(() => {
     updateFilters(selectedCategory, debouncedSearch, sortOrder, 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, selectedCategory, sortOrder]);
 
   const handleCategoryChange = (
@@ -146,16 +147,16 @@ export default function ProductManagement() {
   };
 
   return (
-    <div className="flex flex-col items-center h-auto bg-white text-gray-800 ml-20 py-4 gap-4">
+    <div className="flex flex-col items-center h-auto bg-white text-gray-800 ml-20 pt-12 pb-4 gap-4">
       <h1 className="font-bold">PRODUCT MANAGEMENT</h1>
 
       <div className="flex space-x-4">
         <button
           onClick={openCreateModal}
-          className="flex bg-lime-500 items-center p-2 rounded-md h-10 hover:bg-lime-400"
+          className="flex bg-orange-500 items-center p-2 rounded-md h-10 hover:bg-orange-400 text-white"
         >
-          Add Data
-          <IoAddCircleOutline size={30} />
+          <h1 className="pr-1">Add Data</h1>
+          <IoAddCircleOutline size={35} color="white" />
         </button>
 
         <select

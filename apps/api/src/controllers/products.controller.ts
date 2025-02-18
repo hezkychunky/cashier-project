@@ -39,7 +39,7 @@ export class ProductController {
       if (search) whereCondition.name = { contains: search.toString() };
 
       const currentPage = parseInt(page as string, 10) || 1;
-      const pageSize = parseInt(limit as string, 10) || 6;
+      const pageSize = parseInt(limit as string, 10) || 7;
 
       const totalItems = await prisma.product.count({ where: whereCondition });
 

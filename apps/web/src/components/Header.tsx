@@ -18,8 +18,8 @@ export const Header = () => {
 
   return (
     <header className="bg-orange-500 text-white p-4 flex justify-even items-center sticky top-0 z-30">
-      <h1 className="text-xl font-semibold">
-        Hi,{' '}
+      <h1 className="text-xl font-sans font-semibold">
+        Hello,{' '}
         <span className="text-xl font-semibold text-gray-800">
           {user?.fullName}
         </span>
@@ -27,19 +27,19 @@ export const Header = () => {
       <div className="flex-1 text-center font-bold text-3xl">
         BETTER<span className="text-gray-800"> CASHIER</span>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 font-bold">
         {userRole === 'CASHIER' &&
           (shift ? (
             <button
               onClick={() => setIsEndModalVisible(true)}
-              className="bg-gray-800 text-orange-500 px-2 w-24 py-2 rounded font-medium hover:bg-gray-700"
+              className="bg-gray-800 text-orange-500 px-2 w-24 py-2 rounded hover:bg-gray-700"
             >
               End Shift
             </button>
           ) : (
             <button
               onClick={() => setIsStartModalVisible(true)}
-              className="bg-white text-orange-500 px-2 w-24 py-2 rounded font-medium hover:bg-orange-100"
+              className="bg-white text-orange-500 px-2 w-24 py-2 rounded hover:bg-orange-100"
             >
               Start Shift
             </button>
@@ -48,7 +48,7 @@ export const Header = () => {
         {user && (
           <button
             onClick={logout}
-            className="bg-white text-orange-500 px-2 w-24 py-2 rounded font-medium hover:bg-orange-100"
+            className="bg-white text-orange-500 px-2 w-24 py-2 rounded hover:bg-orange-100"
           >
             Logout
           </button>

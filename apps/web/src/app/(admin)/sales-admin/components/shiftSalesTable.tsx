@@ -15,7 +15,7 @@ interface ShiftSalesTableProps {
 
 export const ShiftSalesTable = ({ shiftSales }: ShiftSalesTableProps) => {
   return (
-    <div className="flex flex-col items-center justify-center p-4 border-2 border-orange-500 shadow-lg rounded-2xl w-3/4 mx-auto">
+    <div className="flex flex-col items-center justify-center p-4 border-4 border-orange-500 shadow-lg rounded-2xl w-3/4 mx-auto">
       <h2 className="text-xl font-semibold text-gray-800 mb-4">
         Sales By Shift
       </h2>

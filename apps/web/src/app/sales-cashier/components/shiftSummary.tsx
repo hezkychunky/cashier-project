@@ -12,7 +12,7 @@ const ShiftSummary: React.FC<ShiftSummaryProps> = ({
   return (
     <div className="flex flex-col items-center justify-center p-4 mb-8 bg-orange-500 shadow-lg rounded-2xl w-3/4 mx-auto">
       <h2 className="text-xl font-semibold text-gray-800 mb-4">
-        Shift Summary
+        Your Current Shift Summary
       </h2>
 
       <div className="grid grid-cols-2 gap-6 w-full">

@@ -16,7 +16,7 @@ export default function ResetFiltersButton() {
       onClick={handleResetFilters}
       className="flex items-center p-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-all"
     >
-      <IoRefreshOutline className="mx-2" size={20} />
+      <IoRefreshOutline className="mx-1" size={30} />
     </button>
   );
 }

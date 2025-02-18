@@ -77,7 +77,7 @@ export const Menu = ({ productsData, onAddToCart }: MenuProps) => {
                   </div>
                 )}
               </div>
-              <p className="font-medium">{product.name}</p>
+              <p className="font-medium pt-4">{product.name}</p>
               <p className="text-gray-800">{product.price?.toLocaleString()}</p>
             </div>
           );
