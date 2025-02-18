@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import prisma from '@/prisma';
 
+interface CartItem {
+  productId: number;
+  quantity: number;
+  price: number;
+}
+
 export class OrderController {
   async getOrder(req: Request, res: Response) {
     try {
@@ -32,17 +38,11 @@ export class OrderController {
           cardNumber:
             paymentMethod === 'DEBIT' ? paymentDetails.cardNumber : null,
           orderItems: {
-            create: cart.map(
-              (item: {
-                productId: number;
-                quantity: number;
-                price: number;
-              }) => ({
-                productId: item.productId,
-                quantity: item.quantity,
-                price: item.price,
-              }),
-            ),
+            create: cart.map((item: CartItem) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+            })),
           },
         },
       });
@@ -129,7 +129,7 @@ export class OrderController {
       });
 
       const detailedProductSales = await Promise.all(
-        productSales.map(async (item) => {
+        productSales.map(async (item: any) => {
           const product = await prisma.product.findUnique({
             where: { id: item.productId },
           });
@@ -177,12 +177,12 @@ export class OrderController {
         },
       });
 
-      const shiftSummary = shifts.map((shift) => {
+      const shiftSummary = shifts.map((shift: any) => {
         const cashOrders = shift.orders.filter(
-          (order) => order.paymentMethod === 'CASH',
+          (order: any) => order.paymentMethod === 'CASH',
         );
         const debitOrders = shift.orders.filter(
-          (order) => order.paymentMethod === 'DEBIT',
+          (order: any) => order.paymentMethod === 'DEBIT',
         );
 
         return {
@@ -193,11 +193,11 @@ export class OrderController {
           endCash: shift.endCash,
           transactionCount: shift.orders.length,
           cashTotal: cashOrders.reduce(
-            (sum, order) => sum + order.totalPrice,
+            (sum: any, order: any) => sum + order.totalPrice,
             0,
           ),
           debitTotal: debitOrders.reduce(
-            (sum, order) => sum + order.totalPrice,
+            (sum: any, order: any) => sum + order.totalPrice,
             0,
           ),
         };
@@ -250,10 +250,10 @@ export class OrderController {
           .json({ message: 'No orders found for this date' });
       }
 
-      const formattedOrders = orders.map((order) => ({
+      const formattedOrders = orders.map((order: any) => ({
         id: order.id,
         createdAt: order.createdAt,
-        items: order.orderItems.map((item) => ({
+        items: order.orderItems.map((item: any) => ({
           name: item.product.name,
           price: item.price,
           quantity: item.quantity,
